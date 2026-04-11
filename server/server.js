@@ -22,7 +22,7 @@ async function readJSON(filename) {
     const data = JSON.parse(raw);
     return data;
   } catch (err) {
-    console.error("Error reading JSON file:", err);
+    console.error("Invalid JSON in file:", filename);
     return null;
   }
 }
@@ -65,11 +65,9 @@ app.get('/movies', async function (req, res) {
   try {
     const files = await listStoredMovies();
 
-    const movies = await Promise.all(
-      files.map(async (file) => {
-        return readJSON(file);
-      }).filter(movie => movie !== null) // filter out any files that failed to read
-    );
+    const movies = (await Promise.all(
+      files.map(file => readJSON(file))
+    )).filter(movie => movie !== null) // filter out any files that failed to read;
 
     res.json(movies);
   } catch (err) {
