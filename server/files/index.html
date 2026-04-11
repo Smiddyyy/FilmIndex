@@ -6,26 +6,357 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movies!</title>
     <style>
-        /* Part 3: Your styling goes here */
-    </style>
-    <script>
-        function reverseString(s) {
-            return s.split("").reverse().join("");
+        body {
+            background: lavender;
         }
 
+        #page-title {
+            text-align: center;
+            margin: 40px auto 20px;
+            font-family: Inter, system-ui, sans-serif;
+            color: #111827;
+        }
+
+        #movie-card-container {
+            max-width: 95%;
+            margin: 20px auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: left;
+        }
+
+        /* movie card container */
+        .movie-card {
+            width: 300px;
+            margin: 5px;
+            padding: 16px;
+            border-radius: 20px;
+            background: #ffffff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            font-family: Inter, system-ui, sans-serif;
+            color: #111827;
+        }
+
+        .movie-card header h2 {
+            margin: 0 0 12px;
+            font-size: 1.4rem;
+            line-height: 1.2;
+        }
+
+        .movie-card img {
+            display: block;
+            width: 100%;
+            max-width: 200px;
+            margin: 0 auto 14px;
+            border-radius: 14px;
+        }
+
+        .movie-card p {
+            margin: 0 0 14px;
+            color: #4b5563;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        /* movie details section */
+        .movie-card p.movie-details {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            letter-spacing: 0.02em;
+            color: #777;
+            margin: 0.5rem 0;
+            padding-bottom: 10px;
+        }
+
+        .movie-card p.movie-details .label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .movie-card p.movie-details .value {
+            font-weight: 400;
+        }
+
+        .movie-card p.movie-details .separator {
+            margin: 0 8px;
+            color: #aaa;
+        }
+
+        /* ratings section */
+        .movie-ratings {
+            display: flex;
+            justify-content: left;
+            gap: 8px;
+            margin: auto 0 5px;
+        }
+
+        .rating-badge {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        /* genre tags */
+        .genre-tag {
+            display: inline-block;
+            margin: 0 8px 8px 0;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #ede9fe;
+            color: #374151;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .movie-card hr {
+            border: 0;
+            height: 1px;
+            background: #e5e7eb;
+            margin: 16px 0;
+        }
+
+        /* tablist container */
+        .credits-tablist {
+            display: flex;
+            gap: 8px;
+            padding: 6px;
+            margin-bottom: 14px;
+            background: #f3f4f6;
+            border-radius: 14px;
+            width: fit-content;
+        }
+
+        /* tabs */
+        .credits-tab-button {
+            border: 0;
+            background: transparent;
+            color: #4b5563;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+
+        /* hover */
+        .credits-tab-button:hover {
+            background: rgba(255, 255, 255, 0.7);
+            color: #111827;
+        }
+
+        /* active tab */
+        .credits-tab-button[aria-selected="true"] {
+            background: #ffffff;
+            color: #111827;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+        }
+
+        /* keyboard focus */
+        .credits-tab-button:focus-visible {
+            outline: 2px solid #6366f1;
+            outline-offset: 2px;
+        }
+
+        /* panels */
+        .credits-panel {
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+        }
+
+        .credits-panel h2 {
+            margin: 0 0 5px;
+            font-size: 1rem;
+        }
+
+        .credits-panel ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .credits-panel li {
+            color: #374151;
+        }
+    </style>
+    <script>
         window.onload = function () {
             const xhr = new XMLHttpRequest()
             xhr.onload = function () {
-                const bodyElement = document.querySelector("body")
+                const bodyElement = document.querySelector("body");
+
                 if (xhr.status == 200) {
-		            /* Part 2: Build the HTML elements here and append them to the body */ 
-                    bodyElement.append(reverseString(xhr.responseText))
+                    const movies = JSON.parse(xhr.responseText);
+
+                    const mainElement = document.createElement("main");
+
+                    const pageTitle = document.createElement("h1");
+                    pageTitle.id = "page-title";
+                    pageTitle.textContent = "Movie List";
+
+                    const movieCardContainer = document.createElement("div");
+                    movieCardContainer.id = "movie-card-container";
+
+                    mainElement.append(pageTitle);
+                    mainElement.append(movieCardContainer);
+
+
+                    movies.forEach((movie, movieIndex) => {
+                        const article = document.createElement("article");
+                        article.classList.add("movie-card"); // Add a class for styling
+
+                        const header = document.createElement("header");
+
+                        const title = document.createElement("h2");
+                        title.textContent = movie.title;
+
+                        header.append(title);
+                        article.append(header);
+
+                        // Poster image
+                        const poster = document.createElement("img");
+                        poster.src = movie.poster;
+                        poster.alt = "Poster of " + movie.title;
+                        poster.width = 200;
+                        article.append(poster);
+
+                        // Details as simple text
+                        const detailsText = document.createElement("p");
+                        detailsText.classList.add("movie-details");
+                        detailsText.innerHTML = `
+                            <span class="label">Runtime</span> 
+                            <span class="value">${movie.runtime} min</span>
+                            <span class="separator">|</span>
+                            <span class="label">Released</span> 
+                            <span class="value">${movie.released}</span>
+                            `;
+                        article.append(detailsText);
+
+                        // Genres as tags
+                        const genres = document.createElement("div");
+                        movie.genres.forEach(genre => {
+                            const genreSpan = document.createElement("span");
+                            genreSpan.textContent = genre;
+                            genreSpan.classList.add("genre-tag"); // Add a class for styling
+                            genres.append(genreSpan);
+                        });
+                        article.append(genres);
+
+                        // Plot summary
+                        const plot = document.createElement("p");
+                        plot.textContent = movie.plot;
+                        article.append(plot);
+
+                        // Ratings as pills
+                        const ratingsText = document.createElement("div");
+                        ratingsText.classList.add("movie-ratings");
+                        ratingsText.innerHTML = `
+                        <span class="rating-badge imdb">IMDb ${movie.imdbRating}/10</span>
+                        <span class="rating-badge metascore">RT ${movie.metascore}%</span>
+                        `;
+                        article.append(ratingsText);
+
+
+                        // Credits section with tabs
+                        // Create tablist container
+                        const tablist = document.createElement("div");
+                        tablist.classList.add("credits-tablist");
+                        tablist.setAttribute("role", "tablist");
+                        tablist.setAttribute("aria-label", "Movie Credits");
+
+                        // Define tabs with data
+                        const tabs = [
+                            { id: "directors", label: "Directors", items: movie.directors },
+                            { id: "writers", label: "Writers", items: movie.writers },
+                            { id: "stars", label: "Stars", items: movie.actors }
+                        ];
+
+                        // Create all tab buttons
+                        const panels = [];
+                        tabs.forEach((tab, index) => {
+                            const button = document.createElement("button");
+                            button.id = `tab-${movieIndex}-${tab.id}`;
+                            button.classList.add("credits-tab-button");
+                            button.setAttribute("role", "tab");
+                            button.setAttribute("aria-controls", `panel-${movieIndex}-${tab.id}`);
+                            button.setAttribute("aria-selected", index === 0 ? "true" : "false");
+                            button.setAttribute("tabindex", index === 0 ? "0" : "-1");
+                            button.textContent = tab.label;
+
+                            tablist.append(button);
+
+                            // Create corresponding panel
+                            const panel = document.createElement("section");
+                            panel.id = `panel-${movieIndex}-${tab.id}`;
+                            panel.classList.add("credits-panel");
+                            panel.setAttribute("role", "tabpanel");
+                            panel.setAttribute("aria-labelledby", `tab-${movieIndex}-${tab.id}`);
+                            if (index !== 0) {
+                                panel.setAttribute("hidden", "");
+                            }
+
+                            const heading = document.createElement("h2");
+                            heading.textContent = tab.label;
+                            panel.append(heading);
+
+                            const list = document.createElement("ul");
+                            tab.items.forEach(item => {
+                                const listItem = document.createElement("li");
+                                listItem.textContent = item;
+                                list.append(listItem);
+                            });
+                            panel.append(list);
+
+                            panels.push({ button, panel });
+                        });
+
+                        // Set up click handlers for tab switching
+                        panels.forEach(({ button, panel }) => {
+                            button.addEventListener("click", () => {
+                                // Deactivate all tabs and panels
+                                panels.forEach(({ button: btn, panel: pnl }) => {
+                                    btn.setAttribute("aria-selected", "false");
+                                    btn.setAttribute("tabindex", "-1");
+                                    pnl.setAttribute("hidden", "");
+                                });
+
+                                // Activate clicked tab and its panel
+                                button.setAttribute("aria-selected", "true");
+                                button.setAttribute("tabindex", "0");
+                                panel.removeAttribute("hidden");
+                            });
+                        });
+
+                        article.append(document.createElement("hr")); // Add a horizontal rule for separation
+                        article.append(tablist);
+                        panels.forEach(({ panel }) => article.append(panel));
+
+                        movieCardContainer.append(article);
+                    });
+
+                    bodyElement.append(mainElement);
                 } else {
-                    bodyElement.append("Daten konnten nicht geladen werden, Status " + xhr.status + " - " + xhr.statusText)
+                    const errorMessage = document.createElement("p");
+                    errorMessage.textContent =
+                        "Daten konnten nicht geladen werden, Status " +
+                        xhr.status +
+                        " - " +
+                        xhr.statusText;
+                    bodyElement.append(errorMessage);
                 }
-            }
-            xhr.open("GET", "/movies")
-            xhr.send()
+            };
+
+            xhr.open("GET", "/movies");
+            xhr.send();
         }
     </script>
 
