@@ -20,17 +20,18 @@ async function readJSON(filename) {
   try {
     const raw = await fs.readFile(`data/${filename}`, 'utf-8');
     const data = JSON.parse(raw);
-    console.log(data);
+    return data;
   } catch (err) {
-    console.error(err);
+    console.error("Error reading JSON file:", err);
+    return null;
   }
 }
 
-function listStoredMovies() {
+async function listStoredMovies() {
   return fs.readdir('data')
     .then(files => files.filter(file => file.endsWith('.json')))
     .catch(err => {
-      console.error(err);
+      console.error("Error reading directory:", err);
       return [];
     });
 }
@@ -59,10 +60,23 @@ function normalizeMovieData(movie) {
 app.use(express.static(path.join(__dirname, 'files')));
 
 // Configure a 'get' endpoint for data..
-app.get('/movies', function (req, res) {
-  // Part 1: Remove the next line and replace with your code
-  res.send('!dlrow olleH')
-})
+app.get('/movies', async function (req, res) {
+  // This endpoint will return a list of all movies stored in the JSON files (returns json data as list).
+  try {
+    const files = await listStoredMovies();
+
+    const movies = await Promise.all(
+      files.map(async (file) => {
+        return readJSON(file);
+      }).filter(movie => movie !== null) // filter out any files that failed to read
+    );
+
+    res.json(movies);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'internal: failed to read movies' });
+  }
+});
 
 app.post('/fetch-new-movie', async (req, res) => {
   //This endpoint will fetch a new movie from the OMDB API and save it to a JSON file.
