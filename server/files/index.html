@@ -184,44 +184,66 @@
             margin: 10px 0;
         }
 
-        /* tablist container */
+        .details-section {
+            max-height: 180px;
+            overflow: auto;
+        }
+
+        /* container */
         .details-tablist {
-            display: flex;
-            justify-content: space-evenly;
-            gap: 3px;
-            padding: 3px;
-            margin-bottom: 5px;
+            display: inline-flex;
+            /* tighter than full-width flex */
             background: #f3f4f6;
-            color: #374151;
-            border-radius: 14px;
+            border-radius: 999px;
+            /* fully rounded */
+            padding: 2px;
+            margin-bottom: 10px;
         }
 
         /* tabs */
         .details-tab-button {
             border: 0;
             background: transparent;
-            color: #374151;
-            padding: 4px 14px;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            font-weight: 600;
+            color: #6b7280;
+            /* softer inactive color */
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 500;
             cursor: pointer;
-            transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+            transition: all 0.2s ease;
         }
 
+        /* hover */
         .details-tab-button:hover {
-            background: rgba(255, 255, 255, 0.7);
             color: #111827;
         }
 
+        /* active */
         .details-tab-button[aria-selected="true"] {
-            background: #dfdcef;
+            background: #ffffff;
             color: #111827;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
         }
 
+        /* underline indicator */
+        .details-tab-button[aria-selected="true"]::after {
+            content: "";
+            position: absolute;
+            left: 20%;
+            bottom: -1px;
+            width: 60%;
+            height: 4px;
+            background: #c72ae6;
+            border-radius: 2px;
+        }
+
         /* panels */
-        .details-panel {
+        .credits-panel-container {
+            overflow: auto;
+        }
+
+        .credits-panel {
             margin-bottom: 8px;
             padding: 5px 14px 10px;
             font-size: 0.9em;
@@ -230,17 +252,17 @@
             border: 1px solid #e5e7eb;
         }
 
-        .details-panel h2 {
+        .credits-panel h2 {
             font-size: 0.9rem;
             margin: 0px;
         }
 
-        .details-panel ul {
+        .credits-panel ul {
             margin: 0;
             padding-left: 18px;
         }
 
-        .details-panel li {
+        .credits-panel li {
             color: #374151;
         }
 
@@ -266,7 +288,7 @@
             position: relative;
         }
 
-        .scrollable::after {
+        .scrollable-fade::after {
             content: "";
             position: sticky;
             bottom: 0;
@@ -400,6 +422,7 @@
                         const plot = document.createElement("p");
                         plot.classList.add("movie-plot");
                         plot.classList.add("scrollable");
+                        plot.classList.add("scrollable-fade");
                         plot.textContent = movie.plot;
 
                         // Ratings as pills
@@ -410,23 +433,22 @@
                         <span class="rating-badge metascore">Metascore ${movie.metascore}</span>
                         `;
 
-                        // Contributors list
-                        const contributorsPanel = document.createElement("div");
-                        const ActorsTitle = document.createElement("h3");
-
-                        const contributors = [
+                        // credits list
+                        const creditsPanel = document.createElement("p");
+                        creditsPanel.classList.add("credits-panel-container")
+                        const credits = [
                             { id: "actors", label: "Actors", items: movie.actors },
                             { id: "directors", label: "Directors", items: movie.directors },
                             { id: "writers", label: "Writers", items: movie.writers }
                         ];
-                        contributors.forEach(contributor => {
+                        credits.forEach(contributor => {
 
-                            const contributorDiv = document.createElement("div");
-                            contributorDiv.classList.add("details-panel");
+                            const creditsDiv = document.createElement("div");
+                            creditsDiv.classList.add("credits-panel");
 
                             const title = document.createElement("h2");
                             title.textContent = contributor.label;
-                            contributorDiv.append(title);
+                            creditsDiv.append(title);
 
                             const list = document.createElement("ul");
                             contributor.items.forEach(item => {
@@ -434,8 +456,8 @@
                                 listItem.textContent = item;
                                 list.append(listItem);
                             });
-                            contributorDiv.append(list);
-                            contributorsPanel.append(contributorDiv);
+                            creditsDiv.append(list);
+                            creditsPanel.append(creditsDiv);
                         });
 
                         // Credits section with tabs
@@ -448,7 +470,7 @@
                         // Define tabs with data
                         const tabs = [
                             { id: "summary", label: "Summary", items: [plot, ratingsText] },
-                            { id: "credits", label: "Credits", items: [contributorsPanel] },
+                            { id: "credits", label: "Credits", items: [creditsPanel] },
                         ];
 
                         // Create all tab buttons
@@ -467,6 +489,11 @@
 
                             // Create corresponding panel
                             const panel = document.createElement("section");
+                            panel.classList.add("details-section")
+                            panel.classList.add("scrollable")
+                            if (tab.id === "credits") {
+                                panel.classList.add("scrollable-fade");
+                            }
                             panel.id = `panel-${movieIndex}-${tab.id}`;
                             panel.setAttribute("role", "tabpanel");
                             panel.setAttribute("aria-labelledby", `tab-${movieIndex}-${tab.id}`);
