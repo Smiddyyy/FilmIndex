@@ -58,7 +58,7 @@
 
         .movie-card header h2 {
             margin: 0 0 12px;
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             line-height: 1.2;
         }
 
@@ -98,7 +98,7 @@
 
         .movie-card p {
             margin: 14px 0;
-            color: #4b5563;
+            color: black;
             line-height: 1.5;
             font-size: 0.95rem;
         }
@@ -246,7 +246,7 @@
 
         /* custom scrollbar */
         .scrollable::-webkit-scrollbar {
-            width: 8px;
+            width: 4px;
         }
 
         .scrollable::-webkit-scrollbar-track {
@@ -254,12 +254,12 @@
         }
 
         .scrollable::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.25);
-            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 999px;
         }
 
         .scrollable::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.35);
         }
 
         .scrollable {
@@ -401,9 +401,6 @@
                         plot.classList.add("movie-plot");
                         plot.classList.add("scrollable");
                         plot.textContent = movie.plot;
-                        const plotHeading = document.createElement("strong");
-                        plotHeading.textContent = "Overview: ";
-                        plot.insertBefore(plotHeading, plot.firstChild);
                         movieDetails.append(plot);
 
                         // Ratings as pills
@@ -425,9 +422,9 @@
 
                         // Define tabs with data
                         const tabs = [
+                            { id: "actors", label: "Actors", items: movie.actors },
                             { id: "directors", label: "Directors", items: movie.directors },
-                            { id: "writers", label: "Writers", items: movie.writers },
-                            { id: "stars", label: "Stars", items: movie.actors }
+                            { id: "writers", label: "Writers", items: movie.writers }
                         ];
 
                         // Create all tab buttons
