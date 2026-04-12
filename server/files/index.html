@@ -187,7 +187,7 @@
         /* tablist container */
         .credits-tablist {
             display: flex;
-            justify-content: left;
+            justify-content: space-evenly;
             gap: 3px;
             padding: 3px;
             margin-bottom: 5px;
@@ -401,7 +401,6 @@
                         plot.classList.add("movie-plot");
                         plot.classList.add("scrollable");
                         plot.textContent = movie.plot;
-                        movieDetails.append(plot);
 
                         // Ratings as pills
                         const ratingsText = document.createElement("div");
@@ -410,8 +409,34 @@
                         <span class="rating-badge imdb">IMDb ${movie.imdbRating}/10</span>
                         <span class="rating-badge metascore">Metascore ${movie.metascore}</span>
                         `;
-                        movieDetails.append(ratingsText);
 
+                        // Contributors list
+                        const contributorsPanel = document.createElement("div");
+                        const ActorsTitle = document.createElement("h3");
+
+                        const contributors = [
+                            { id: "actors", label: "Actors", items: movie.actors },
+                            { id: "directors", label: "Directors", items: movie.directors },
+                            { id: "writers", label: "Writers", items: movie.writers }
+                        ];
+                        contributors.forEach(contributor => {
+
+                            const contributorDiv = document.createElement("div");
+                            contributorDiv.classList.add("credits-panel");
+
+                            const title = document.createElement("h2");
+                            title.textContent = contributor.label;
+                            contributorDiv.append(title);
+
+                            const list = document.createElement("ul");
+                            contributor.items.forEach(item => {
+                                const listItem = document.createElement("li");
+                                listItem.textContent = item;
+                                list.append(listItem);
+                            });
+                            contributorDiv.append(list);
+                            contributorsPanel.append(contributorDiv);
+                        });
 
                         // Credits section with tabs
                         // Create tablist container
@@ -422,9 +447,8 @@
 
                         // Define tabs with data
                         const tabs = [
-                            { id: "actors", label: "Actors", items: movie.actors },
-                            { id: "directors", label: "Directors", items: movie.directors },
-                            { id: "writers", label: "Writers", items: movie.writers }
+                            { id: "summary", label: "Summary", items: [plot, ratingsText] },
+                            { id: "credits", label: "Credits", items: [contributorsPanel] },
                         ];
 
                         // Create all tab buttons
@@ -444,24 +468,13 @@
                             // Create corresponding panel
                             const panel = document.createElement("section");
                             panel.id = `panel-${movieIndex}-${tab.id}`;
-                            panel.classList.add("credits-panel");
                             panel.setAttribute("role", "tabpanel");
                             panel.setAttribute("aria-labelledby", `tab-${movieIndex}-${tab.id}`);
                             if (index !== 0) {
                                 panel.setAttribute("hidden", "");
                             }
 
-                            const heading = document.createElement("h2");
-                            heading.textContent = tab.label;
-                            panel.append(heading);
-
-                            const list = document.createElement("ul");
-                            tab.items.forEach(item => {
-                                const listItem = document.createElement("li");
-                                listItem.textContent = item;
-                                list.append(listItem);
-                            });
-                            panel.append(list);
+                            tab.items.forEach(item => panel.append(item));
 
                             panels.push({ button, panel });
                         });
