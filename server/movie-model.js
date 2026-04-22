@@ -4,12 +4,71 @@ const fs = require('fs/promises');
 require('dotenv').config();
 
 // ---------------
+// In-memory movie cache
+// ---------------
+// Key: movie imdbID, Value: movie object
+let movieCache = {};
+
+// ---------------
+// Cache management
+// ---------------
+
+// Load all movies from data directory into memory
+async function loadAllMovies() {
+  try {
+    const files = await fs.readdir('data');
+    const jsonFiles = files.filter(file => file.endsWith('.json'));
+    
+    const loadedMovies = {};
+    
+    for (const file of jsonFiles) {
+      try {
+        const raw = await fs.readFile(`data/${file}`, 'utf-8');
+        const movie = JSON.parse(raw);
+        if (movie && movie.imdbID) {
+          loadedMovies[movie.imdbID] = movie;
+        }
+      } catch (err) {
+        console.error("Failed to load movie from file:", file, err);
+      }
+    }
+    
+    movieCache = loadedMovies;
+    console.log(`Loaded ${Object.keys(movieCache).length} movies into memory`);
+    return movieCache;
+  } catch (err) {
+    console.error("Failed to load movies:", err);
+    movieCache = {};
+    return movieCache;
+  }
+}
+
+// Get all movies from cache
+function getAllMovies() {
+  return Object.values(movieCache);
+}
+
+// Get a single movie from cache by imdbID
+function getMovie(imdbID) {
+  return movieCache[imdbID] || null;
+}
+
+// Update/add a movie in cache (used after writeJSON)
+function setMovie(imdbID, movie) {
+  movieCache[imdbID] = movie;
+}
+
+// ---------------
 // helpers methods
 // ---------------
 
 async function writeJSON(filename, data) {
   await fs.mkdir('data', { recursive: true });
   await fs.writeFile(`data/${filename}`, JSON.stringify(data, null, 2));
+  // Update cache after writing
+  if (data.imdbID) {
+    movieCache[data.imdbID] = data;
+  }
 }
 
 async function readJSON(filename) {
@@ -50,23 +109,12 @@ function normalizeMovieData(movie) {
 }
 
 module.exports = {
+  loadAllMovies,
+  getAllMovies,
+  getMovie,
+  setMovie,
   writeJSON,
   readJSON,
   listStoredMovies,
   normalizeMovieData
 };
-
-
-// --- showcase ---
-// model = {
-//     "tt1375666": {
-//         "imdbID": "tt1375666",
-//         "title": "Sample Movie",
-//         "released": "2010-07-15",
-//     },
-//     "tt0172495": {
-//         "imdbID": "tt0172495",
-//         "title": "Sample Movie 2",
-//         "released": "2000-05-04",
-//     }
-// }
