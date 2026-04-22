@@ -199,9 +199,6 @@ function renderMovies(xhrRequest) {
                 const panel = document.createElement("section");
                 panel.classList.add("details-section")
                 panel.classList.add("scrollable")
-                if (tab.id === "credits") {
-                    panel.classList.add("scrollable-fade");
-                }
                 panel.id = `panel-${movieIndex}-${tab.id}`;
                 panel.setAttribute("role", "tabpanel");
                 panel.setAttribute("aria-labelledby", `tab-${movieIndex}-${tab.id}`);
