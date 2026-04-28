@@ -1,25 +1,41 @@
-const express = require('express')
-const path = require('path')
+const express = require('express');
+const path = require('path');
+const bodyParser = require("body-parser");
+const session = require("express-session");
+const bcrypt = require("bcrypt");
 const fs = require('fs/promises');
-const { writer } = require('repl');
-const { writeJSON, readJSON, listStoredMovies, normalizeMovieData, loadAllMovies, getAllMovies, getMovie } = require('./movie-model.js');
+const config = require("./config.js");
+const userModel = require("./user-model.js");
+const { writeJSON, readJSON, normalizeMovieData, loadAllMovies, getAllMovies, getMovie } = require('./movie-model.js');
 
 require('dotenv').config();
 
 const app = express()
 
 // Parse JSON bodies
-app.use(express.json());
+app.use(bodyParser.json());
 
 // ---------------
 // Main server code
 // ---------------
+// Session middleware
+app.use(session({
+  secret: config.sessionSecret,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Set to true if using HTTPS
+}));
 
 // Serve static content in directory 'files'
 app.use(express.static(path.join(__dirname, 'files')));
 
-// Configure a 'get' endpoint for data..
+
+// ---------------
+//  Movies Endpoints
+// ---------------
 app.get('/movies', function (req, res) {
+  const username = req.session.user?.username;
+
   // accept optional query parameter 'genre' to filter movies by genre (e.g. /movies?genre=Action)
   // can be used multiple times to filter by multiple genres (e.g. /movies?genre=Action,Sci-Fi)
   const genreFilter = req.query.genre;
@@ -30,6 +46,7 @@ app.get('/movies', function (req, res) {
     console.log("Received request for movies with genre filters:", genreFilters);
   }
   
+  // accept optional query parameter 'title' to filter movies by title (e.g. /movies?title=godfather)
   const titleFilter = req.query.title
   ? req.query.title.toLowerCase().trim()
   : null;
@@ -39,7 +56,7 @@ app.get('/movies', function (req, res) {
 
   // This endpoint will return a list of all movies from in-memory cache (returns json data as list).
   try {
-    const movies = getAllMovies()
+    const movies = getAllMovies(username)
       .filter(movie => {
         // genre filter
         if (genreFilters) {
@@ -68,11 +85,11 @@ app.get('/movies', function (req, res) {
   }
 });
 
-// Configure a 'get' endpoint for a specific movie
-app.get('/movies/:imdbID', function (req, res) {
+app.get('/movies/:imdbID', requireLogin, function (req, res) {
   try {
+    const username = req.session.user?.username;
     const imdbID = req.params.imdbID;
-    const movie = getMovie(imdbID);
+    const movie = getMovie(username, imdbID);
     if (!movie) {
       return res.status(404).json({ error: 'Movie not found' });
     }
@@ -83,7 +100,7 @@ app.get('/movies/:imdbID', function (req, res) {
   }
 });
 
-app.put('/movies/:imdbID', async function (req, res) {
+app.put('/movies/:imdbID', requireLogin, async function (req, res) {
   const imdbID = req.params.imdbID;
   const movie = req.body;
 
@@ -98,7 +115,7 @@ app.put('/movies/:imdbID', async function (req, res) {
 
   try {
     // Check if movie exists in cache to determine if update or create
-    const existingMovie = getMovie(imdbID);
+    const existingMovie = getMovie(null, imdbID);
     const fileExists = existingMovie !== null;
 
     // writeJSON also updates the cache
@@ -115,8 +132,11 @@ app.put('/movies/:imdbID', async function (req, res) {
   }
 });
 
-// Custom endpoint to fetch a new movie from the OMDB API and save it to a JSON file.
-app.post('/fetch-new-movie', async function (req, res) {
+app.delete("/movies/:imdbID", requireLogin, function (req, res) {
+  //TODO
+});
+
+app.post('/fetch-new-movie', requireLogin, async function (req, res) {
   //This endpoint will fetch a new movie from the OMDB API and save it to a JSON file.
   try {
     const title = req.query.title;
@@ -126,7 +146,7 @@ app.post('/fetch-new-movie', async function (req, res) {
     }
 
     // Call OMDB API
-    const apiKey = process.env.OMDb_apikey;
+    const apiKey = config.OMDB_API_KEY;
     if (!apiKey) {
       return res.status(500).json({ error: 'internal: OMDb API key not configured' });
     }
@@ -160,6 +180,51 @@ app.post('/fetch-new-movie', async function (req, res) {
 });
 
 // ---------------
+//  Session Endpoints
+// ---------------
+function requireLogin(req, res, next) {
+  if (req.session && req.session.user) {
+    return next();
+  }
+
+  return res.status(401).json({ error: "Login required" });
+}
+
+app.post("/login", function (req, res) {
+  const { username, password } = req.body;
+  const user = userModel[username];
+  if (user && bcrypt.compareSync(password, user.password)) {
+    req.session.user = {
+      username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      loginTime: new Date().toISOString(),
+    };
+    res.send(req.session.user);
+  } else {
+    res.sendStatus(401);
+  }
+});
+
+app.get("/logout", function(req, res){
+  req.session.destroy((err) => {
+    if (err) {
+      return res.sendStatus(500);
+    }
+    res.sendStatus(200);
+  });
+});
+
+app.get("/session", function (req, res) {
+  if (req.session.user) {
+    res.send(req.session.user);
+  } else {
+    res.status(401).json(null);
+  }
+});
+
+
+// ---------------
 // Server startup
 // ---------------
 
@@ -167,8 +232,8 @@ async function startServer() {
   // Load all movies into memory at startup
   await loadAllMovies();
   
-  app.listen(3000);
-  console.log("Server now listening on http://localhost:3000/");
+  app.listen(config.port);
+  console.log(`Server now listening on http://localhost:${config.port}/`);
 }
 
 startServer();

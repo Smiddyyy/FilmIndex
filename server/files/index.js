@@ -1,12 +1,75 @@
+let currentSession = null;
+
 window.onload = function () {
+    const loginDialog = document.getElementById("loginDialog");
+    const loginForm = document.getElementById('loginForm');
+    const searchField = document.getElementById("search-input");
     const sidebar = document.getElementById("filter-sidebar");
     const toggleBtn = document.getElementById("menu-toggle");
     const closeBtn = document.getElementById("close-sidebar");
-    const searchField = document.getElementById("search-input");
+    const authBtn = document.getElementById('authBtn');
     const body = document.body;
 
-    fetchMovies();
-    renderGenreFilters();
+    fetch("/session")
+    .then(response => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    })
+    .then(data => {
+      currentSession = data || null;
+      updateUI();
+    })
+    .catch(error => {
+      console.error('Failed to load session:', error);
+      currentSession = null;
+      updateUI();
+    });
+
+    // Login dialog
+    loginDialog.addEventListener("close", () => {
+        if (!currentSession) {
+            loginDialog.showModal(); // reopen immediately
+        }
+    });
+
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const username = formData.get('username');
+        const password = formData.get('password');
+
+        const response = await fetch("/login", {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ username, password })
+        });
+
+        if (response.ok) {
+            currentSession = await response.json();
+            fetchMovies();
+            updateUI();
+            loginDialog.close();
+            renderLogin();
+        } else {
+            alert("Invalid username or password");
+        }
+    });
+
+    authBtn.onclick = () => {
+        fetch("/logout")
+          .then(response => {
+            if (response.ok) {
+              currentSession = null;
+              updateUI();
+              renderLogout();
+            }
+          })
+          .catch(error => {
+            console.error('Logout failed:', error);
+          });
+    };
 
     closeBtn.addEventListener("click", () => {
         body.classList.toggle("sidebar-closed");
@@ -21,7 +84,69 @@ window.onload = function () {
     searchField.addEventListener("keyup", function (event) {
         fetchMovies();
     });
+
 };
+
+function updateUI() {
+    fetchMovies();
+    renderGenreFilters();
+    if (currentSession) {
+        document.body.classList.remove("sidebar-closed");
+        document.getElementById("menu-toggle").setAttribute("hidden", "");
+        document.getElementById("movie-card-container").classList.remove("blurred");
+    } else {
+        document.body.classList.add("sidebar-closed");
+        document.getElementById("menu-toggle").removeAttribute("hidden");
+        document.getElementById("movie-card-container").classList.add("blurred");
+        loginForm.reset();
+        loginDialog.showModal();
+    }
+}
+
+function renderLogout(){
+    const greetingElement = document.getElementById('user-greeting');
+    greetingElement.innerHTML= `
+        <p class="greeting-title">
+        👋 See you soon!
+        </p>
+    `;
+    greetingElement.style.display = "block";
+    greetingElement.classList.add("show");
+    setTimeout(() => {
+        greetingElement.classList.add("hide");
+
+        setTimeout(() => {
+            greetingElement.classList.remove("show", "hide");
+            greetingElement.style.display = "none";
+        }, 500);
+    }, 3000);
+}
+
+function renderLogin() {
+    const greetingElement = document.getElementById('user-greeting');
+    if (currentSession) {
+        const loginDate = new Date(currentSession.loginTime);
+        const formattedTime = loginDate.toLocaleString();
+        greetingElement.innerHTML= `
+            <p class="greeting-title">
+                👋 Welcome, <span class="greeting-name">${currentSession.firstName} ${currentSession.lastName}</span>!
+            </p>
+            <p class="greeting-user">@${currentSession.username}</p>
+            <p class="greeting-time">Logged in at: ${formattedTime}</p>
+        `;
+
+        greetingElement.style.display = "block";
+        greetingElement.classList.add("show");
+        setTimeout(() => {
+            greetingElement.classList.add("hide");
+            
+            setTimeout(() => {
+                greetingElement.classList.remove("show", "hide");
+                greetingElement.style.display = "none";
+            }, 500);
+        }, 10000);
+    }
+}
 
 function fetchMovies() {
     const xhr = new XMLHttpRequest()

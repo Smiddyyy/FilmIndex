@@ -1,18 +1,21 @@
 {
-  "name": "web-23-exercise-1",
+  "name": "movie-database",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "start": "node server/server.js",
-    "start-nodemon": "nodemon server/server.js"
+    "start-nodemon": "nodemon --ignore data --ignore data/movies server/server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^17.4.1",
-    "express": "^4.18.2"
+    "bcrypt": "^5.1.0",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3"
   },
   "devDependencies": {
     "nodemon": "^2.0.20"

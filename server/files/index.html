@@ -15,6 +15,7 @@
     <header>
         <button id="menu-toggle" aria-label="Open filters">☰</button>
         <h1 id="page-title">Movies!</h1>
+        <div id="user-greeting"></div>
     </header>
     <main id="movie-card-container" class="scrollable">
 
@@ -37,10 +38,31 @@
             <hr>
             <div id="available-filters"></div>
         </div>
+        <div id="manage">
+            <!-- TODO -->
+            <button id="searchBtn">Search</button> 
+            <button id="authBtn">Logout</button>
+        </div>
     </aside>
     <footer>
         <p>© 2026 Movies! &nbsp; - &nbsp; Written by Tobias Schmidt</p>
     </footer>
-</body>
 
+    <!-- Login Dialog -->
+    <dialog id="loginDialog">
+      <form id="loginForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <button type="submit">Login</button>
+      </form>
+    </dialog>
+
+    <!-- Search Dialog -->
+    <dialog id="searchDialog">
+        <!-- TODO -->
+    </dialog>
+
+</body>
 </html>

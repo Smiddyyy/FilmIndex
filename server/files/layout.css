@@ -61,7 +61,7 @@ body.sidebar-closed {
 }
 
 body.sidebar-closed aside {
-    padding: 0px;
+    padding: 0px !important;
     border: none;
 }
 
@@ -103,4 +103,148 @@ body>footer {
     border: none;
     color: #4d1a51;
     cursor: pointer;
+}
+
+/* Exercise 4 */
+#movie-card-container.blurred {
+  filter: blur(6px);
+  pointer-events: none;
+  user-select: none;
+}
+
+#user-greeting {
+  display: none; /* hidden by default */
+}
+
+#user-greeting.show {
+  display: block;
+
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 2000;
+
+  min-width: 320px;
+  max-width: 380px;
+
+  background: white;
+  border-radius: 16px;
+  padding: 18px 20px;
+
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
+  border-left: 6px solid #6c63ff;
+
+  animation: greetingSlideIn 0.4s ease-out;
+}
+
+#user-greeting.hide {
+  animation: greetingSlideOut 0.5s ease-in forwards;
+}
+
+#user-greeting.hide.finished {
+  display: none;
+}
+
+.greeting-title {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1f1f2e;
+}
+
+.greeting-name {
+  color: #5a2d82;
+}
+
+.greeting-user {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.greeting-time {
+  margin: 10px 0 0;
+  font-size: 0.8rem;
+  color: #888;
+}
+
+@keyframes greetingSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(120%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes greetingSlideOut {
+  to {
+    opacity: 0;
+    transform: translateX(120%);
+  }
+}
+
+/* login dialog */
+#loginDialog {
+  width: min(360px, 90vw);
+  padding: 0;
+  border: none;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
+}
+
+#loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px;
+}
+
+#loginForm label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+#loginForm input {
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  color: #111827;
+  background: #f9fafb;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#loginForm input:focus {
+  border-color: #832197ab;
+  box-shadow: 0 0 0 3px rgba(131, 33, 151, 0.18);
+  background: #ffffff;
+}
+
+#loginForm button {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 999px;
+  background: #4d1a51;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#loginForm button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+#loginForm button:active {
+  transform: translateY(0);
 }

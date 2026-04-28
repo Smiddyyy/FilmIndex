@@ -58,23 +58,26 @@ function getMovie() {
   return movie;
 }
 
-function putMovie() { 
+async function putMovie() {
   const movie = getMovie();
-  const xhr = new XMLHttpRequest();
-  xhr.open("PUT", "/movies/" + imdbID);
-  xhr.setRequestHeader("Content-Type", "application/json");
-  xhr.onload = function () {
-    if (xhr.status === 200 || xhr.status === 201) {
-      // Reload the parent window (index.html) to show updated data
-      if (window.opener) {
-        window.opener.location.reload();
-      }
-      window.close(); // Close the popout window
-    } else {
-      alert("Saving of movie data failed. Status code was " + xhr.status);
+
+  const res = await fetch("/movies/" + imdbID, {
+    method: "PUT",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(movie)
+  });
+
+  if (res.ok) {
+    if (window.opener && !window.opener.closed) {
+      window.opener.location.reload();
     }
-  };
-  xhr.send(JSON.stringify(movie));
+    window.close();
+  } else {
+    alert("Saving failed: " + res.status);
+  }
 }
 
 /** Loading and setting the movie data for the movie with the passed imdbID */
