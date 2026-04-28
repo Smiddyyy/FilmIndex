@@ -1,0 +1,22 @@
+{
+    "admin": {
+        "firstName": "Ultimate",
+        "lastName": "Beeing",
+        "_comment": "password: admin",
+        "password": "$2a$12$I3kgdy.CVZEGh0itQXO5SOzaXmOXzxO82nr85hTFPQSFVilyTTqW.",
+        "movies": "__all__"
+    },
+    "tobi": {
+        "firstName": "Tobias",
+        "lastName": "Schmidt",
+        "_comment": "password: abc",
+        "password": "$2a$12$tEK4SfzdFrhqtbVzhGSUPecppQ6KWKuJJK/x/Wnx.OeX2a1Wozyvy",
+        "movies": [
+            "tt0031381",
+            "tt0032138",
+            "tt0033467",
+            "tt0034583",
+            "tt123456"
+        ]
+    }
+}
